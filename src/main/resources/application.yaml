@@ -1,0 +1,50 @@
+# FYI: NettyRoutingFilter is the last filter that performs an actual HTTP request
+logging:
+  level:
+    "org.springframework.cloud.gateway": TRACE
+spring:
+  profiles:
+    active: dev
+  cloud:
+    gateway:
+      routes:
+        - id: anonymouse-route
+          uri: http://no-op
+          predicates:
+            - Path=${anonymouse-route-path-predicate}
+          filters:
+            - ReplaceUri
+            - RewritePath=${rewrite-pattern}, /$\1
+            - PrefixPath=/api
+        - id: authenticated-route
+          uri: http://no-op
+          predicates:
+            - Path=${authenticated-route-path-predicate}
+          filters:
+            - ValidateJwt
+            - ReplaceUri
+            - RewritePath=${rewrite-pattern}, /$\1
+            - PrefixPath=/api
+
+---
+spring:
+  profiles: dev
+
+# pattern that handles /api/{namespace}/{service}/** and /api/{namespace}/{service}
+# https://regex101.com/r/GgQerm/1
+rewrite-pattern: "/api/[^/]*/[^/]*/?(.+|)"
+anonymouse-route-path-predicate:
+  /api/{namespace}/{service:authentication-service}/login,
+  /api/{namespace}/{service:catalog-service}/product
+authenticated-route-path-predicate: /api/{namespace}/{service}/**
+
+---
+spring:
+  profiles: prod
+
+# pattern that handles /api/{service}/** and /api/{service}
+rewrite-pattern: "/api/[^/]*/?(.+|)"
+anonymouse-route-path-predicate:
+  /api/{service:authentication-service}/login,
+  /api/{service:catalog-service}/product
+authenticated-route-path-predicate: /api/{service}/**
