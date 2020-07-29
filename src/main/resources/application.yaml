@@ -8,10 +8,10 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: anonymouse-route
+        - id: anonymous-route
           uri: http://no-op
           predicates:
-            - Path=${anonymouse-route-path-predicate}
+            - Path=${anonymous-route-path-predicate}
           filters:
             - ReplaceUri
             - RewritePath=${rewrite-pattern}, /$\1
@@ -33,7 +33,7 @@ spring:
 # pattern that handles /api/{namespace}/{service}/** and /api/{namespace}/{service}
 # https://regex101.com/r/GgQerm/1
 rewrite-pattern: "/api/[^/]*/[^/]*/?(.+|)"
-anonymouse-route-path-predicate:
+anonymous-route-path-predicate:
   /api/{namespace}/{service:authentication-service}/login,
   /api/{namespace}/{service:catalog-service}/product
 authenticated-route-path-predicate: /api/{namespace}/{service}/**
@@ -44,7 +44,7 @@ spring:
 
 # pattern that handles /api/{service}/** and /api/{service}
 rewrite-pattern: "/api/[^/]*/?(.+|)"
-anonymouse-route-path-predicate:
+anonymous-route-path-predicate:
   /api/{service:authentication-service}/login,
   /api/{service:catalog-service}/product
 authenticated-route-path-predicate: /api/{service}/**
